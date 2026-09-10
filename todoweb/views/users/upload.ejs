@@ -1,0 +1,18 @@
+<%- include('../partials/header')%>
+    <div class="container">
+        <div class="card">
+            <form action="" method="post" encType="multipart/form-data">
+            <div class="card-header text-center">
+                <h1>Upload Avatar</h1>
+            </div>
+            <div class="card-body">
+                <input type="file" class="form-control" name="avatar" accept="image/*" />
+            </div>
+            <div class="card-footer">
+                <button class="btn btn-primary" type="submit">Upload</button>
+                <a class="btn btn-warning" href="/todos">Cancel</a>
+            </div>
+            </form>
+        </div>
+    </div>
+<%- include('../partials/footer')%>
