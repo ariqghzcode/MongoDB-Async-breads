@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -17,6 +17,7 @@
     "express-session": "^1.19.0",
     "http-errors": "~1.6.3",
     "moment": "^2.30.1",
+    "mongodb": "^7.6.0",
     "morgan": "~1.9.1",
     "pg": "^8.23.0",
     "sqlite3": "^6.0.1"

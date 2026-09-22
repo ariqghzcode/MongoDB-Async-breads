@@ -1,0 +1,46 @@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="delete-form">
+                <input type="hidden" id="delete-id" name="id">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Confirmation</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success mb-0" type="button" onclick="removeData()">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const entity = '<%= entity %>'
+    const deleteModal = new bootstrap.Modal('#deleteModal', {
+        keyboard: false
+    })
+    const removeData = async () => {
+        const id = document.getElementById('delete-id').value
+        const response = await fetch(`/api/${entity}/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+        if (!response.ok) {
+            throw Error(`Response status: ${response.status}`);
+        }
+        const result = await response.json();
+        loadData();
+        deleteModal.hide()
+    }
+
+    const deleteData = (id) => {
+        document.getElementById('delete-id').value = id
+        deleteModal.show()
+    }
+</script>

@@ -1,124 +1,314 @@
 <%- include('../partials/header')%>
     <div class="container">
-        <%- include('../partials/menu')%>
-            <div class="card mt-3">
-                <div class="card-header text-center">
-                    <h1>PostgreSQL Breads(Browse, Read, Edit, Add, Delete, Sort)</h1>
-                </div>
-                <div class="card-body">
-                    <form action="" method="get">
-                        <div class="row mb-3">
-                            <label for="title" class="col-sm-2 col-form-label">Title</label>
-                            <div class="col-sm-10">
-                                <input class="form-control" type="text" name="title" placeholder="insert title"
-                                    value="<%= query.title %>">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="startdate" class="col-sm-2 col-form-label">Deadline</label>
-                            <div class="col-sm-4">
-                                <input class="form-control" type="date" name="startdate" value="<%= query.startdate %>">
-                            </div>
-                            <label for="enddate" class="col-sm-1 col-form-label text-center">s.d.</label>
-                            <div class="col-sm-4">
-                                <input class="form-control" type="date" name="enddate" value="<%= query.enddate %>">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="complete" class="col-sm-2 col-form-label">Complete</label>
-                            <div class="col-sm-10">
-                                <select class="form-control" name="complete">
-                                    <option value="" disabled selected>-select complete-</option>
-                                    <option value="false" <%=query.complete==="false" ? ' selected' : '' %>>Not yet
-                                    </option>
-                                    <option value="true" <%=query.complete==="true" ? ' selected' : '' %>>Done</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button class="btn btn-info" type="submit"><i
-                                class="fa-solid fa-magnifying-glass"></i></button>
-                        <a class="btn btn-warning" href="/todos"><i class="fa-solid fa-rotate"></i></a>
-
-                    </form>
-                    <hr>
-                </div>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th><a
-                                    href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=title`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
-                                        class="fa-solid fa-<%= `${sortBy == 'title' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Title</a>
-                            </th>
-                            <th><a
-                                    href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=complete`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
-                                        class="fa-solid fa-<%= `${sortBy == 'complete' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Complete</a>
-                            </th>
-                            <th><a
-                                    href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=deadline`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
-                                        class="fa-solid fa-<%= `${sortBy == 'deadline' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Deadline</a>
-                            </th>
-                            <th>actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% rows.forEach((item, index)=> { %>
-                            <% const isOverdue=item.deadline && !item.complete &&
-                                moment(item.deadline).isBefore(moment()) %>
-                                <tr class="<%= isOverdue ? 'table-danger' : '' %>">
-                                    <td>
-                                        <%= index + 1 %>
-                                    </td>
-                                    <td>
-                                        <%= item.title %>
-                                    </td>
-                                    <td>
-                                        <%= item.complete ? 'Done' : 'Not yet' %>
-                                    </td>
-                                    <td>
-                                        <%= moment(item.deadline).format('D MMM YYYY HH:mm') %>
-                                    </td>
-                                    <td><a class="btn btn-success" href="/todos/edit/<%= item.id %>"><i class="fa-solid fa-pencil"></i></a>
-                                        <a class="btn btn-danger" href="/todos/delete/<%= item.id %>"
-                                            onclick="return confirm('apakah anda yakin menghapus <%= item.id %>')"><i class="fa-solid fa-trash"></i></a>
-                                    </td>
-                                </tr>
-                                <% }) %>
-                    </tbody>
-                </table>
-
-                <div class="card-footer d-flex justify-content-between align-items-center">
-                    <a class="btn btn-primary btn-sm" href="/todos/add"><i class="fa-solid fa-plus"></i></a>
-                    <nav aria-label="Page navigation example">
-                        <ul class="pagination mb-0">
-                            <% if (page> 1){ %>
-                                <li class="page-item">
-                                    <a class="page-link"
-                                        href="/todos?<%= url.replace(`page=${page}`, `page=${page - 1}`) %>"
-                                        aria-label="Previous">
-                                        <span aria-hidden="true">&laquo;</span>
-                                    </a>
-                                </li>
-                                <% } %>
-                                    <% for (let i=1; i <=pages; i++) {%>
-                                        <li class="page-item<%= page == i ? ' active' : '' %>"><a class="page-link"
-                                                href="/todos?<%= url.replace(`page=${page}`, `page=${i}`) %>">
-                                                <%= i %>
-                                            </a></li>
-                                        <% } %>
-                                            <% if (page < pages){ %>
-                                                <li class="page-item">
-                                                    <a class="page-link"
-                                                        href="/todos?<%= url.replace(`page=${page}`, `page=${page + 1}`) %>"
-                                                        aria-label="Next">
-                                                        <span aria-hidden="true">&raquo;</span>
-                                                    </a>
-                                                </li>
-                                                <% } %>
-                        </ul>
-                    </nav>
-                </div>
+        <div class="card mt-3">
+            <div class="card-header text-center">
+                <h1>Todo List</h1>
             </div>
+            <div class="card-body">
+                <form id="search-form">
+                    <div class="row mb-3">
+                        <label for="title" class="col-sm-2 col-form-label">Title</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" type="text" id="title-search" name="title"
+                                placeholder="insert title" value="">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="startdate" class="col-sm-2 col-form-label">Deadline</label>
+                        <div class="col-sm-4">
+                            <input class="form-control" type="date" id="startdate-search" name="startdate"
+                                value="<%= query.startdate %>">
+                        </div>
+                        <label for="enddate" class="col-sm-1 col-form-label text-center">s.d.</label>
+                        <div class="col-sm-4">
+                            <input class="form-control" type="date" id="enddate-search" name="enddate"
+                                value="<%= query.enddate %>">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label for="complete" class="col-sm-2 col-form-label">Complete</label>
+                        <div class="col-sm-10">
+                            <select id="complete-search" class="form-control" name="complete">
+                                <option value="" disabled selected>-select complete-</option>
+                                <option value="false">Not yet</option>
+                                <option value="true">Done</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-info" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <button id="reset-search" class="btn btn-warning" type="button"><i
+                            class="fa-solid fa-rotate"></i></button>
+
+                </form>
+                <hr>
+            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th><a
+                                href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=title`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
+                                    class="fa-solid fa-<%= `${sortBy == 'title' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Title</a>
+                        </th>
+                        <th><a
+                                href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=complete`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
+                                    class="fa-solid fa-<%= `${sortBy == 'complete' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Complete</a>
+                        </th>
+                        <th><a
+                                href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=deadline`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
+                                    class="fa-solid fa-<%= `${sortBy == 'deadline' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Deadline</a>
+                        </th>
+                        <th>actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-content">
+
+                </tbody>
+            </table>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <button id="add-button" type="button" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i></button>
+                <nav aria-label="Page navigation example" id="pagination"></nav>
+            </div>
+        </div>
     </div>
-    <%- include('../partials/footer')%>
+
+    <!-- Modal -->
+    <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="todo-form">
+                    <input type="hidden" id="id" name="id">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="formModalLabel">Add Todo list</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label for="title" class="col-sm-2 col-form-label">Title</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" type="text" id="title" name="title"
+                                        placeholder="insert your to do lists">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success mb-0" type="submit">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <%- include('../partials/editForm') %>
+        <script>
+        const urlParams = new URLSearchParams(window.location.search)
+        let params = {
+            page: 1
+        }
+
+        if (urlParams.get('executor')) {
+            params.executor = urlParams.get('executor')
+        }
+
+        const formModal = new bootstrap.Modal('#formModal', {
+            keyboard: false
+        })
+
+        const todoForm = document.getElementById('todo-form')
+        todoForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            saveData()
+        })
+
+        const editModal = new bootstrap.Modal('#editModal', {
+            keyboard: false
+        })
+
+        const editForm = document.getElementById('edit-form')
+        editForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            updateData()
+        })
+
+        const searchForm = document.getElementById('search-form')
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            const title = document.getElementById('title-search').value
+            const complete = document.getElementById('complete-search').value
+            const startdate = document.getElementById('startdate-search').value
+            const enddate = document.getElementById('enddate-search').value
+            console.log(title, complete)
+            params = { ...params, title, complete, startdate, enddate }
+            loadData()
+        })
+
+        document.getElementById('reset-search').addEventListener('click', function (event) {
+            document.getElementById('title-search').value = ''
+            document.getElementById('complete-search').value = ''
+            document.getElementById('startdate-search').value = ''
+            document.getElementById('enddate-search').value = ''
+            delete params.title
+            delete params.complete
+            delete params.startdate
+            delete params.enddate
+            params.page = 1
+            loadData()
+        })
+
+        document.getElementById('add-button').addEventListener('click', function (event) {
+            document.getElementById('id').value = ""
+            document.getElementById('title').value = ""
+            formModal.show()
+        })
+
+        const pagination = (page, pages) => {
+            html = `<ul class="pagination mb-0">`
+            if (page > 1) {
+                html += `<li class="page-item">
+                        <a class="page-link"
+                            href="javascript:void(0)" 
+                            onclick="changePage(${page - 1})"
+                            aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>`
+            }
+            for (let i = 1; i <= pages; i++) {
+                html += `<li class="page-item ${page == i ? ' active' : ''}">
+                        <a class="page-link" href="javascript:void(0)" onclick="changePage(${i})">${i}</a>
+                    </li>`
+            }
+            if (page < pages) {
+                html += `<li class="page-item">
+                        <a class="page-link"
+                            href="javascript:void(0)" 
+                            onclick="changePage(${page + 1})"
+                            aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>`
+            }
+            html += `</ul>`
+            document.getElementById('pagination').innerHTML = html
+            pagination(result.page, result.pages)
+        }
+        const url = 'http://localhost:3000/'
+        const loadData = async () => {
+            try {
+                const response = await fetch(`/api/todos?${new URLSearchParams(params)}`);
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                html = ''
+                result.data.forEach((item, index) => {
+                    const isOverdue = item.deadline && !item.complete &&
+                        moment(item.deadline).isBefore(moment())
+                    html += `<tr class="${isOverdue ? 'table-danger' : ''}">
+                                <td>
+                                    ${index + result.offset + 1}
+                                </td>
+                                <td>
+                                    ${item.title}
+                                </td>
+                                <td>
+                                    ${item.complete ? 'Done' : 'Not yet'}
+                                </td>
+                                <td>
+                                    ${moment(item.deadline).format('D MMM YYYY HH:mm')}
+                                </td>
+                                <td><button class="btn btn-success" type="button" onclick="editData('${item._id}')"><i
+                                            class="fa-solid fa-pencil"></i></button>
+                                    <button class="btn btn-danger" type="button" onclick="deleteData('${item._id}')"
+                                        onclick="return confirm('apakah anda yakin menghapus '${item._id}'')"><i
+                                            class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>`
+                })
+                document.getElementById('table-content').innerHTML = html
+                pagination(result.page, result.pages)
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+        loadData()
+
+        const saveData = async () => {
+            const title = document.getElementById('title').value
+            try {
+                const response = await fetch('/api/todos', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ title, executor: params.executor })
+                });
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                loadData()
+                formModal.hide()
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+        const updateData = async () => {
+            const id = document.getElementById('edit-id').value
+            const title = document.getElementById('edit-title').value
+            const deadline = document.getElementById('edit-deadline').value
+            const complete = document.getElementById('edit-complete').value
+            try {
+                const response = await fetch(`/api/todos/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ title, deadline, complete })
+                });
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                loadData()
+                editModal.hide()
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+        const changePage = (page) => {
+            params = { ...params, page }
+            loadData()
+        }
+
+        const editData = async (id) => {
+            try {
+                const response = await fetch(`/api/todos/${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                });
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                document.getElementById('edit-id').value = result._id
+                document.getElementById('edit-title').value = result.title ?? ''
+                document.getElementById('edit-deadline').value = result.deadline ? moment(result.deadline).format('YYYY-MM-DDTHH:mm') : ''
+                document.getElementById('edit-complete').value = result.complete === null || result.complete === undefined ? '' : String(result.complete)
+                editModal.show()
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+        </script>
+        <%- include('../partials/deleteConfirmation', { entity: 'todos' } )%>
+            <%- include('../partials/footer')%>

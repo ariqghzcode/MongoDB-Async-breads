@@ -1,0 +1,47 @@
+<%- include('../partials/header')%>
+    <!-- Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="edit-form">
+                    <input type="hidden" id="edit-id" name="id">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="editModalLabel">Edit</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label for="title" class="col-sm-2 col-form-label">Title</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" type="text" id="edit-title" name="title"
+                                        placeholder="edit your to do lists">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="deadline" class="col-sm-2 col-form-label">Deadline</label>
+                                <div class="col-sm-10">
+                                    <input class="form-control" type="datetime-local" id="edit-deadline" name="deadline">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="complete" class="col-sm-2 col-form-label">Complete</label>
+                                <div class="col-sm-10">
+                                    <select class="form-control" id="edit-complete" name="complete" required>
+                                        <option value="" disabled selected>-select complete-</option>
+                                        <option value="false">Not yet</option>
+                                        <option value="true">Done</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success mb-0" type="submit">Save</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <%- include('../partials/footer')%>

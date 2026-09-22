@@ -1,142 +1,289 @@
 <%- include('../partials/header')%>
-    <div class="container">
-        <%- include('../partials/menu')%>
-        <div class="card mt-3">
-            <div class="card-header text-center">
-                <h1>PostgreSQL Breads(Browse, Read, Edit, Add, Delete, Sort)</h1>
-            </div>
-            <div class="card-body">
-                <form action="" method="get">
-                    <div class="row mb-3">
-                        <label for="name" class="col-sm-2 col-form-label">Name</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" type="text" name="name" placeholder="insert your name"
-                                value="<%= query.name %>">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="height" class="col-sm-2 col-form-label">Height</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" type="number" name="height" placeholder="insert your height"
-                                value="<%= query.height %>">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="weight" class="col-sm-2 col-form-label">Weight</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" type="number" name="weight" placeholder="insert your weight"
-                                step="0.1" value="<%= query.weight %>">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="startdate" class="col-sm-2 col-form-label">Birth Date</label>
-                        <div class="col-sm-4">
-                            <input class="form-control" type="date" name="startdate" value="<%= query.startdate %>">
-                        </div>
-                        <label for="enddate" class="col-sm-1 col-form-label text-center">s.d.</label>
-                        <div class="col-sm-4">
-                            <input class="form-control" type="date" name="enddate" value="<%= query.enddate %>">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <label for="ismarried" class="col-sm-2 col-form-label">Marital Status</label>
-                        <div class="col-sm-10">
-                            <select class="form-control" name="ismarried">
-                                <option value="" disabled selected>have you married ?</option>
-                                <option value="false" <%=query.ismarried==="false" ? ' selected' : '' %>>Not yet
-                                </option>
-                                <option value="true" <%=query.ismarried==="true" ? ' selected' : '' %>>yes</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-success" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-                    <a class="btn btn-warning" href="/users"><i class="fa-solid fa-rotate"></i></a>
+<div class="container">
+    <div class="card mt-3">
+        <div class="card-header text-center">
+            <h1>MongoDB Breads(Browse, Read, Edit, Add, Delete, Sort)</h1>
+        </div>
+        <div class="card-body">
+            <div class="d-flex align-items-center mb-3 flex-wrap">
+                <div class="input-group me-2" style="width: auto;">
+                    <span class="input-group-text">Show</span>
+                    <select id="show-entries" class="form-select" style="width:65px;">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="all">all</option>
+                    </select>
+                    <span class="input-group-text">entries</span>
+                </div>
 
+                <form id="search-form" class="input-group flex-grow-1 w-auto" autocomplete="off">
+                    <input class="form-control" id="search" type="text" name="search" placeholder="Search" value="">
+                    <button class="btn btn-info me-1" type="submit"><i
+                            class="fa-solid fa-magnifying-glass"></i></button>
+                    <button id="reset-search" class="btn btn-warning" type="button"><i
+                            class="fa-solid fa-rotate"></i></button>
                 </form>
-                <hr>
-            </div>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th><a href="/users?<%= url.replace(`sortBy=${sortBy}`, `sortBy=name`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i class="fa-solid fa-<%= `${sortBy == 'name' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Name</a></th>
-                        <th>Height</th>
-                        <th>Weight</th>
-                        <th>Birth Date</th>
-                        <th>Is Married</th>
-                        <th>Role</th>
-                        <th>Avatar</th>
-                        <th>actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% rows.forEach(item=> { %>
-                        <tr>
-                            <td>
-                                <%= item.id %>
-                            </td>
-                            <td>
-                                <%= item.name %>
-                            </td>
-                            <td>
-                                <%= item.height %>
-                            </td>
-                            <td>
-                                <%= item.weight %>
-                            </td>
-                            <td>
-                                <%= moment(item.birthdate).format("D MMMM YYYY") %>
-                            </td>
-                            <td>
-                                <%= item.ismarried ? 'Yes' : 'Not yet' %>
-                            </td>
-                            <td>
-                                <%= item.role %>
-                            </td>
-                            <td>
-                                <img src="/images/avatars/<%= item.avatar || 'user.png' %>" alt="ini avatar" width="50">
-                            </td>
-                            <td><a class="btn btn-success" href="/users/edit/<%= item.id %>"><i class="fa-solid fa-pencil"></i></a>
-                                <a class="btn btn-danger" href="/users/delete/<%= item.id %>"
-                                    onclick="return confirm('apakah anda yakin menghapus <%= item.id %>')"><i class="fa-solid fa-trash"></i></a>
-                                <a class="btn btn-warning" href="/users/upload/<%= item.id %>"><i class="fa-solid fa-circle-user"></i></a>
-                            </td>
-                        </tr>
-                        <% }) %>
-                </tbody>
-            </table>
 
-            <div class="card-footer d-flex justify-content-end align-items-center">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination mb-0">
-                        <% if (page> 1){ %>
-                            <li class="page-item">
-                                <a class="page-link" href="/users?<%= url.replace(`page=${page}`, `page=${page - 1}`) %>"
-                                    aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-                            <% } %>
-                                <% for (let i=1; i <=pages; i++) {%>
-                                    <li class="page-item<%= page == i ? ' active' : '' %>"><a class="page-link"
-                                            href="/users?<%= url.replace(`page=${page}`, `page=${i}`) %>">
-                                            <%= i %>
-                                        </a></li>
-                                    <% } %>
-                                        <% if (page < pages){ %>
-                                            <li class="page-item">
-                                                <a class="page-link"
-                                                    href="/users?<%= url.replace(`page=${page}`, `page=${page + 1}`) %>"
-                                                    aria-label="Next">
-                                                    <span aria-hidden="true">&raquo;</span>
-                                                </a>
-                                            </li>
-                                            <% } %>
-                    </ul>
-                </nav>
             </div>
+            <hr>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th><a
+                            href="/users?<%= url.replace(`sortBy=${sortBy}`, `sortBy=name`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
+                                class="fa-solid fa-<%= `${sortBy == 'name' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Name</a>
+                    </th>
+                    <th><a
+                            href="/users?<%= url.replace(`sortBy=${sortBy}`, `sortBy=name`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
+                                class="fa-solid fa-<%= `${sortBy == 'name' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Phone</a>
+                    </th>
+                    <th>actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-content">
+
+            </tbody>
+        </table>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <button id="add-button" type="button" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i></button>
+            <nav aria-label="Page navigation example" id="pagination"></nav>
         </div>
     </div>
-    
-<%- include('../partials/footer')%>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="user-form">
+                <input type="hidden" id="id" name="id">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="formModalLabel">Add User</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <label for="title" class="col-sm-2 col-form-label">Name</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" type="text" id="name" name="name"
+                                    placeholder="insert new users name">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="title" class="col-sm-2 col-form-label">Phone</label>
+                            <div class="col-sm-10">
+                                <input class="form-control" type="text" id="phone" name="phone"
+                                    placeholder="insert phone number">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary mb-0" type="submit">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<%- include('../partials/editUsers') %>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search)
+        let params = {
+            page: 1
+        }
+        if (urlParams.get('userid')) {
+            params.userid = urlParams.get('userid')
+        }
+
+        const formModal = new bootstrap.Modal('#formModal', {
+            keyboard: false
+        })
+
+        const userForm = document.getElementById('user-form')
+        userForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            saveData()
+        })
+
+        const editModal = new bootstrap.Modal('#editModal', {
+            keyboard: false
+        })
+
+        const editForm = document.getElementById('editusers-form')
+        editForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            updateData()
+        })
+
+        const searchForm = document.getElementById('search-form')
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault()
+            const search = document.getElementById('search').value
+            params = { ...params, search, page: 1 }
+            loadData()
+        })
+
+        document.getElementById('reset-search').addEventListener('click', function (event) {
+            document.getElementById('search').value = ''
+            delete params.search
+            params.page = 1
+            loadData()
+        })
+
+        document.getElementById('add-button').addEventListener('click', function (event) {
+            document.getElementById('id').value = ""
+            document.getElementById('name').value = ""
+            document.getElementById('phone').value = ""
+            formModal.show()
+        })
+
+        const pagination = (page, pages) => {
+            html = `<ul class="pagination mb-0">`
+            if (page > 1) {
+                html += `<li class="page-item">
+                    <a class="page-link"
+                        href="javascript:void(0)" 
+                        onclick="changePage(${page - 1})"
+                        aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>`
+            }
+            for (let i = 1; i <= pages; i++) {
+                html += `<li class="page-item ${page == i ? ' active' : ''}">
+                    <a class="page-link" href="javascript:void(0)" onclick="changePage(${i})">${i}</a>
+                </li>`
+            }
+            if (page < pages) {
+                html += `<li class="page-item">
+                    <a class="page-link"
+                        href="javascript:void(0)" 
+                        onclick="changePage(${page + 1})"
+                        aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>`
+            }
+            html += `</ul>`
+            document.getElementById('pagination').innerHTML = html
+            pagination(result.page, result.pages)
+        }
+        const url = 'http://localhost:3000/'
+        const loadData = async () => {
+            try {
+                const response = await fetch(`/api/users?${new URLSearchParams(params)}`);
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                html = ''
+                result.data.forEach((item, index) => {
+                    html += `<tr>
+                            <td>
+                                ${index + 1}
+                            </td>
+                            <td>
+                                ${item.name}
+                            </td>
+                            <td>
+                                ${item.phone}
+                            </td>
+                            <td><button class="btn btn-success" type="button" onclick="editData('${item._id}')"><i
+                                        class="fa-solid fa-pencil"></i></button>
+                                <button class="btn btn-danger" type="button" onclick="deleteData('${item._id}')"
+                                    onclick="return confirm('apakah anda yakin menghapus ${item._id}')"><i
+                                        class="fa-solid fa-trash"></i></button>
+                                <button class="btn btn-warning" type="button" onclick="goToTodos('${item._id}')"><i 
+                                        class="fa-solid fa-right-to-bracket"></i></button>
+                            </td>
+                        </tr>`
+                })
+                document.getElementById('table-content').innerHTML = html
+                pagination(result.page, result.pages)
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+        loadData()
+
+        const saveData = async () => {
+            const name = document.getElementById('name').value
+            const phone = document.getElementById('phone').value
+            try {
+                const response = await fetch('/api/users', {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ name, phone })
+                });
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                loadData()
+                formModal.hide()
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+        const updateData = async () => {
+            const id = document.getElementById('editusers-id').value
+            const name = document.getElementById('edit-name').value
+            const phone = document.getElementById('edit-phone').value
+            try {
+                const response = await fetch(`/api/users/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ name, phone })
+                });
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                loadData()
+                editModal.hide()
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+        const changePage = (page) => {
+            params = { ...params, page }
+            loadData()
+        }
+        const goToTodos = (executor) => {
+            window.location.href = `/todos?executor=${executor}`
+        }
+
+        const editData = async (id) => {
+            try {
+                const response = await fetch(`/api/users/${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                });
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+                document.getElementById('editusers-id').value = result._id
+                document.getElementById('edit-name').value = result.name ?? ''
+                document.getElementById('edit-phone').value = result.phone ?? ''
+                editModal.show()
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+    </script>
+    <%- include('../partials/deleteConfirmation', { entity: 'users' } )%>
+        <%- include('../partials/footer')%>
