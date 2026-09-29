@@ -35,7 +35,7 @@
             throw Error(`Response status: ${response.status}`);
         }
         const result = await response.json();
-        loadData();
+        <%= reloadFn %>();
         deleteModal.hide()
     }
 

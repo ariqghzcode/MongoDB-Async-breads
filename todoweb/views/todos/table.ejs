@@ -35,91 +35,53 @@
                             </select>
                         </div>
                     </div>
-
+                    <button id="sort-deadline" class="btn btn-success me-5" type="button"><i id="sort-deadline-icon" class="fa-solid fa-sort"></i>sort by deadline</button>
                     <button class="btn btn-info" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
                     <button id="reset-search" class="btn btn-warning" type="button"><i
                             class="fa-solid fa-rotate"></i></button>
-
                 </form>
                 <hr>
+                    <form id="quick-add-form" class="input-group flex-grow-1 w-auto" autocomplete="off">
+                        <input class="form-control" type="text" id="title" name="title"
+                                placeholder="title" value="">
+                        <button class="btn btn-primary me-1" type="submit"><i class="fa-solid fa-plus"></i></button>
+                    </form>
             </div>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th><a
-                                href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=title`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
-                                    class="fa-solid fa-<%= `${sortBy == 'title' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Title</a>
-                        </th>
-                        <th><a
-                                href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=complete`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
-                                    class="fa-solid fa-<%= `${sortBy == 'complete' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Complete</a>
-                        </th>
-                        <th><a
-                                href="/todos?<%= url.replace(`sortBy=${sortBy}`, `sortBy=deadline`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
-                                    class="fa-solid fa-<%= `${sortBy == 'deadline' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Deadline</a>
-                        </th>
-                        <th>actions</th>
-                    </tr>
-                </thead>
-                <tbody id="table-content">
-
-                </tbody>
-            </table>
-            <div class="card-footer d-flex justify-content-between align-items-center">
-                <button id="add-button" type="button" class="btn btn-primary">
-                    <i class="fa-solid fa-plus"></i></button>
-                <nav aria-label="Page navigation example" id="pagination"></nav>
-            </div>
+                <div id="todo-list" class="px-3"></div>
+                <div id="infinite-scroll-trigger"></div>
+                <div id="loader" class="text-center text-muted py-3" style="display:none;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Memuat...
+                </div>
+                <div id="end-message" class="text-center text-muted py-3" style="display:none;">
+                Semua data sudah ditampilkan.
+                </div>
         </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form id="todo-form">
-                    <input type="hidden" id="id" name="id">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="formModalLabel">Add Todo list</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <label for="title" class="col-sm-2 col-form-label">Title</label>
-                                <div class="col-sm-10">
-                                    <input class="form-control" type="text" id="title" name="title"
-                                        placeholder="insert your to do lists">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-success mb-0" type="submit">Save</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    
     <%- include('../partials/editForm') %>
         <script>
         const urlParams = new URLSearchParams(window.location.search)
-        let params = {
-            page: 1
-        }
+        let params = {}
 
         if (urlParams.get('executor')) {
             params.executor = urlParams.get('executor')
         }
 
-        const formModal = new bootstrap.Modal('#formModal', {
-            keyboard: false
-        })
+        const state = {
+            page: 1,
+            limit: 10,
+            isLoading: false,
+            hasMore: true
+        }
 
-        const todoForm = document.getElementById('todo-form')
-        todoForm.addEventListener('submit', function (event) {
+        const listEl = document.getElementById('todo-list')
+        const loaderEl = document.getElementById('loader')
+        const endMsgEl = document.getElementById('end-message')
+        const infiniteScrollTrigger = document.getElementById('infinite-scroll-trigger')
+
+        const quickAddForm = document.getElementById('quick-add-form')
+        quickAddForm.addEventListener('submit', function (event) {
             event.preventDefault()
             saveData()
         })
@@ -143,7 +105,7 @@
             const enddate = document.getElementById('enddate-search').value
             console.log(title, complete)
             params = { ...params, title, complete, startdate, enddate }
-            loadData()
+            resetAndLoad()
         })
 
         document.getElementById('reset-search').addEventListener('click', function (event) {
@@ -155,87 +117,99 @@
             delete params.complete
             delete params.startdate
             delete params.enddate
-            params.page = 1
-            loadData()
+            resetAndLoad()
         })
 
-        document.getElementById('add-button').addEventListener('click', function (event) {
-            document.getElementById('id').value = ""
-            document.getElementById('title').value = ""
-            formModal.show()
+        const sortButton = document.getElementById('sort-deadline')
+        const sortIcon = document.getElementById('sort-deadline-icon')
+        let sortState = { sortBy: 'id', sortMode: 'desc'}
+        sortButton.addEventListener('click', function (event) {
+            if (sortState.sortBy !== 'deadline') {
+                sortState = {sortBy: 'deadline', sortMode: 'asc'}
+            } else {
+                sortState.sortMode = sortState.sortMode === 'asc' ? 'desc' : 'asc'
+            }
+            params = { ...params, sortBy: sortState.sortBy, sortMode: sortState.sortMode }
+            sortIcon.className = sortState.sortMode === 'asc' ? 'fa-solid fa-sort-up' : 'fa-solid fa-sort-down'
+            resetAndLoad()
         })
 
-        const pagination = (page, pages) => {
-            html = `<ul class="pagination mb-0">`
-            if (page > 1) {
-                html += `<li class="page-item">
-                        <a class="page-link"
-                            href="javascript:void(0)" 
-                            onclick="changePage(${page - 1})"
-                            aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>`
-            }
-            for (let i = 1; i <= pages; i++) {
-                html += `<li class="page-item ${page == i ? ' active' : ''}">
-                        <a class="page-link" href="javascript:void(0)" onclick="changePage(${i})">${i}</a>
-                    </li>`
-            }
-            if (page < pages) {
-                html += `<li class="page-item">
-                        <a class="page-link"
-                            href="javascript:void(0)" 
-                            onclick="changePage(${page + 1})"
-                            aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>`
-            }
-            html += `</ul>`
-            document.getElementById('pagination').innerHTML = html
-            pagination(result.page, result.pages)
-        }
         const url = 'http://localhost:3000/'
-        const loadData = async () => {
-            try {
-                const response = await fetch(`/api/todos?${new URLSearchParams(params)}`);
-                if (!response.ok) {
-                    throw Error(`Response status: ${response.status}`);
-                }
-                const result = await response.json();
-                html = ''
-                result.data.forEach((item, index) => {
-                    const isOverdue = item.deadline && !item.complete &&
-                        moment(item.deadline).isBefore(moment())
-                    html += `<tr class="${isOverdue ? 'table-danger' : ''}">
-                                <td>
-                                    ${index + result.offset + 1}
-                                </td>
-                                <td>
-                                    ${item.title}
-                                </td>
-                                <td>
-                                    ${item.complete ? 'Done' : 'Not yet'}
-                                </td>
-                                <td>
-                                    ${moment(item.deadline).format('D MMM YYYY HH:mm')}
-                                </td>
-                                <td><button class="btn btn-success" type="button" onclick="editData('${item._id}')"><i
+        const renderItems = (items) => {
+            const fragment =  document.createDocumentFragment()
+            items.forEach((item) => {
+                    const isOverdue = item.deadline && !item.complete && moment(item.deadline).isBefore(moment())
+                    const wrapper = document.createElement('div')
+                    wrapper.innerHTML = `<div class="alert ${isOverdue ? 'alert-danger' : item.complete ? 'alert-success' : 'alert-light'} d-flex justify-content-between align-items-center" role="alert"">
+                                <span>${moment(item.deadline).format('D MMM YYYY HH:mm')} ${item.title}</span>
+                                <span>
+                                    <button class="btn btn-success" type="button" onclick="editData('${item._id}')"><i
                                             class="fa-solid fa-pencil"></i></button>
                                     <button class="btn btn-danger" type="button" onclick="deleteData('${item._id}')"
                                         onclick="return confirm('apakah anda yakin menghapus '${item._id}'')"><i
                                             class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>`
+                                </span>
+                            </div>`
+                    fragment.appendChild(wrapper.firstElementChild)
                 })
-                document.getElementById('table-content').innerHTML = html
-                pagination(result.page, result.pages)
+                listEl.appendChild(fragment)
+        }
+
+        const loadMore = async () => {
+            if (state.isLoading || !state.hasMore) return
+
+            state.isLoading = true
+            loaderEl.style.display = 'block'
+
+            try {
+                const query = { ...params, page: state.page, limit: state.limit }
+                Object.keys(query).forEach((key) => {
+                    if (query[key] === '' || query[key] === undefined || query[key] === null) {
+                        delete query[key]
+                    }
+                })
+
+                const response = await fetch(`/api/todos?${new URLSearchParams(query)}`);
+                if (!response.ok) {
+                    throw Error(`Response status: ${response.status}`);
+                }
+                const result = await response.json();
+
+                renderItems(result.data)
+                state.page += 1 
+
+                if (result.data.length < state.limit || state.page > result.pages) {
+                    state.hasMore = false
+                    endMsgEl.style.display = 'block'
+                    observer.unobserve(infiniteScrollTrigger)
+                }
+
             } catch (error) {
                 console.error(error.message);
+            } finally {
+                state.isLoading = false
+                loaderEl.style.display = 'none'
             }
         }
-        loadData()
+
+        const resetAndLoad = () => {
+            state.page = 1
+            state.hasMore = true
+            listEl.innerHTML = ''
+            endMsgEl.style.display = 'none'
+            observer.observe(infiniteScrollTrigger)
+            loadMore()
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                loadMore()
+            }
+        }, {rootMargin: '200px'})
+
+        observer.observe(infiniteScrollTrigger)
+
+        resetAndLoad()
 
         const saveData = async () => {
             const title = document.getElementById('title').value
@@ -251,8 +225,8 @@
                     throw Error(`Response status: ${response.status}`);
                 }
                 const result = await response.json();
-                loadData()
-                formModal.hide()
+                document.getElementById('title').value = ''
+                resetAndLoad()
             } catch (error) {
                 console.error(error.message);
             }
@@ -275,16 +249,11 @@
                     throw Error(`Response status: ${response.status}`);
                 }
                 const result = await response.json();
-                loadData()
+                resetAndLoad()
                 editModal.hide()
             } catch (error) {
                 console.error(error.message);
             }
-        }
-
-        const changePage = (page) => {
-            params = { ...params, page }
-            loadData()
         }
 
         const editData = async (id) => {
@@ -310,5 +279,5 @@
         }
 
         </script>
-        <%- include('../partials/deleteConfirmation', { entity: 'todos' } )%>
+        <%- include('../partials/deleteConfirmation', { entity: 'todos', reloadFn: 'resetAndLoad' } )%>
             <%- include('../partials/footer')%>

@@ -12,10 +12,13 @@ module.exports = function (db) {
   router.get('/', async (req, res) => {
     try {
       const page = req.query.page || 1
-      const sortBy = req.query.sortBy || 'id'
-      const sortMode = req.query.sortMode || 'asc'
-      const limit = 5
+      const sortBy = req.query.sortBy 
+      const sortMode = req.query.sortMode === 'desc' ? -1 : 1
+      const limit = req.query.limit === 'all' ? 0 : parseInt(req.query.limit) || 5
       const offset = (page - 1) * limit
+
+      const allowedSortFields = ['name', 'phone']
+      const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'name'
 
       let params = {}
 
@@ -25,9 +28,12 @@ module.exports = function (db) {
       }
 
       const total = await Users.countDocuments(params)
-      const pages = Math.ceil(total / limit)
+      const pages = limit === 0 ? 1 : Math.ceil(total / limit)
 
-      const data = await Users.find(params).limit(limit).skip(offset).toArray()
+      const data = await ( 
+        sortBy && allowedSortFields.includes(sortBy)
+          ? Users.find(params).sort({ [sortBy]: sortMode }) 
+          : Users.find(params)).limit(limit).skip(offset).toArray()
 
       res.json({
         data,
@@ -68,7 +74,7 @@ module.exports = function (db) {
     const { name, phone } = req.body
     console.log(req.body)
     try {
-      const data = await Users.updateOne({ _id: new ObjectId(id) }, { $set: { name } }, { $set: { phone } })
+      const data = await Users.updateOne({ _id: new ObjectId(id) }, { $set: { name, phone } })
       console.log(data, "test")
       res.json(data)
     } catch (error) {

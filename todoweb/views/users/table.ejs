@@ -36,8 +36,8 @@
                                 class="fa-solid fa-<%= `${sortBy == 'name' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Name</a>
                     </th>
                     <th><a
-                            href="/users?<%= url.replace(`sortBy=${sortBy}`, `sortBy=name`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
-                                class="fa-solid fa-<%= `${sortBy == 'name' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Phone</a>
+                            href="/users?<%= url.replace(`sortBy=${sortBy}`, `sortBy=phone`).replace(`sortMode=${sortMode}`, `sortMode=${sortMode == 'asc' ? 'desc' : 'asc'}`) %>"><i
+                                class="fa-solid fa-<%= `${sortBy == 'phone' ? sortMode == 'asc' ? 'sort-up' : 'sort-down' : 'sort'}` %>"></i>Phone</a>
                     </th>
                     <th>actions</th>
                 </tr>
@@ -97,6 +97,12 @@
         }
         if (urlParams.get('userid')) {
             params.userid = urlParams.get('userid')
+
+        } if (urlParams.get('sortBy')) {
+        params.sortBy = urlParams.get('sortBy')
+        
+        } if (urlParams.get('sortMode')) {
+        params.sortMode = urlParams.get('sortMode')
         }
 
         const formModal = new bootstrap.Modal('#formModal', {
@@ -139,6 +145,11 @@
             document.getElementById('name').value = ""
             document.getElementById('phone').value = ""
             formModal.show()
+        })
+
+        document.getElementById('show-entries').addEventListener('change', function (event) {
+            params = { ...params, limit: event.target.value, page: 1 }
+            loadData()
         })
 
         const pagination = (page, pages) => {
@@ -285,5 +296,5 @@
         }
 
     </script>
-    <%- include('../partials/deleteConfirmation', { entity: 'users' } )%>
+    <%- include('../partials/deleteConfirmation', { entity: 'users', reloadFn: 'loadData' } )%>
         <%- include('../partials/footer')%>

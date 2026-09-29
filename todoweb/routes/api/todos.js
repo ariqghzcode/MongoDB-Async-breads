@@ -14,8 +14,8 @@ module.exports = function (db) {
     try {
       const page = req.query.page || 1
       const sortBy = req.query.sortBy || 'id'
-      const sortMode = req.query.sortMode || 'asc'
-      const limit = 2
+      const sortMode = req.query.sortMode || 'desc'
+      const limit = parseInt(req.query.limit) || 10
       const offset = (page - 1) * limit
 
       let params = {}
@@ -49,8 +49,9 @@ module.exports = function (db) {
 
       const total = await Todos.countDocuments(params)
       const pages = Math.ceil(total / limit)
-
-      const data = await Todos.find(params).limit(limit).skip(offset).toArray()
+      const sortField = sortBy === 'id' ? '_id' : sortBy
+      const sortDirection = sortMode === 'desc' ? -1 : 1
+      const data = await Todos.find(params).sort({ [sortField]: sortDirection }).limit(limit).skip(offset).toArray()
 
       res.json({
         data,
@@ -58,6 +59,8 @@ module.exports = function (db) {
         query: req.query,
         page: parseInt(page),
         pages,
+        limit,
+        total,
         sortBy,
         sortMode
       });
